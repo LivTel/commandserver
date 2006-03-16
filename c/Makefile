@@ -1,10 +1,10 @@
-# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.3 2006-03-16 11:12:39 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.4 2006-03-16 11:47:01 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
 include ../Makefile.common
 
-BINDIR			= $(AUTOGUIDER_COMMANDSERVER_BIN_HOME)/$(HOSTTYPE)
+BINDIR			= $(AUTOGUIDER_COMMANDSERVER_BIN_HOME)/c/$(HOSTTYPE)
 INCDIR 			= $(AUTOGUIDER_COMMANDSERVER_SRC_HOME)/include
 DOCSDIR 		= $(AUTOGUIDER_COMMANDSERVER_DOC_HOME)/cdocs
 
@@ -18,8 +18,8 @@ LIB_SRCS	= command_server.c
 SRCS		= $(LIB_SRCS)
 LIB_HEADERS	= $(LIB_SRCS:%.c=$(INCDIR)/%.h)
 HEADERS		= $(LIB_HEADERS)
-LIB_OBJS	= $(LIB_SRCS:%.c=%.o)
-OBJS		= $(SRCS:%.c=%.o)
+LIB_OBJS	= $(LIB_SRCS:%.c=$(BINDIR)/%.o)
+OBJS		= $(SRCS:%.c=$(BINDIR)/%.o)
 DOCS 		= $(SRCS:%.c=$(DOCSDIR)/%.html)
 
 top: $(LT_LIB_HOME)/$(LIBRARYNAME).so docs
@@ -32,8 +32,11 @@ $(LT_LIB_HOME)/$(LIBRARYNAME).so : $(LIB_OBJS)
 $(LT_LIB_HOME)/$(LIBRARYNAME).a : $(LIB_OBJS)
 	ar rcv $@ $?
 
-$(BINDIR)/%: %.o
-	$(CC) $< -o $@  -L$(LT_LIB_HOME) $(TIMELIB) $(SOCKETLIB) -lm -lc
+#$(BINDIR)/%: %.o
+#	$(CC) $< -o $@  -L$(LT_LIB_HOME) $(TIMELIB) $(SOCKETLIB) -lm -lc
+
+$(BINDIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@  
 
 docs: $(DOCS)
 
