@@ -1,4 +1,4 @@
-# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.1 2006-03-16 11:07:46 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.2 2006-03-16 11:11:35 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
@@ -16,6 +16,8 @@ DOCFLAGS 	= -static
 
 LIB_SRCS	= command_server.c
 SRCS		= $(LIB_SRCS)
+LIB_HEADERS	= $(LIB_SRCS:%.c=$(INCDIR)/%.h)
+HEADERS		= $(LIB_HEADERS)
 LIB_OBJS	= $(LIB_SRCS:%.c=%.o)
 OBJS		= $(SRCS:%.c=%.o)
 DOCS 		= $(SRCS:%.c=$(DOCSDIR)/%.html)
@@ -54,9 +56,11 @@ backup: tidy
 
 checkin:
 	-$(CI) $(CI_OPTIONS) $(SRCS)
+	-(cd $(INCDIR); $(CI) $(CI_OPTIONS) $(HEADERS);)
 
 checkout:
 	-$(CO) $(CO_OPTIONS) $(SRCS)
+	-(cd $(INCDIR); $(CO) $(CO_OPTIONS) $(HEADERS);)
 
 # DO NOT DELETE
 
