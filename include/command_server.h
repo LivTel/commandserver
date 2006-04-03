@@ -50,6 +50,7 @@ extern int Command_Server_Close_Client(Command_Server_Handle_T *handle);
 extern int Command_Server_Close_Server(Command_Server_Server_Context_T *server_context);
 extern void Command_Server_Error(void);
 extern void Command_Server_Error_To_String(char *error_string);
+extern int Command_Server_Is_Error(void);
 /* logging routines */
 extern void Command_Server_Log_Format(int level,char *format,...);
 extern void Command_Server_Log(int level,char *string);
@@ -61,5 +62,8 @@ extern int Command_Server_Log_Filter_Level_Absolute(int level,char *string);
 extern int Command_Server_Log_Filter_Level_Bitwise(int level,char *string);
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/03/16 11:11:32  cjm
+ * Initial revision
+ *
  */
 #endif

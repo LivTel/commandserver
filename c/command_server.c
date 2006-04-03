@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.1 2006-03-16 11:07:39 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.2 2006-04-03 13:57:19 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.1 $
+ * @revision $Revision: 1.2 $
  */
 
 /**
@@ -230,7 +230,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.1 2006-03-16 11:07:39 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.2 2006-04-03 13:57:19 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -1138,6 +1138,16 @@ void Command_Server_Error_To_String(char *error_string)
 }
 
 /**
+ * Routine checking whether the command server currently has an 'active' error.
+ * @return The routine returns TRUE if there is an 'active' error, otherwise FALSE.
+ * @see #Command_Server_Error_Number
+ */
+int Command_Server_Is_Error(void)
+{
+	return (Command_Server_Error_Number != 0);
+}
+
+/**
  * Routine to log a message to a defined logging mechanism. This routine has an arbitary number of arguments,
  * and uses vsprintf to format them i.e. like fprintf. A temporary buffer is used to hold the created string,
  * therefore the total length of the generated string should not be longer than COMMAND_SERVER_ERROR_STRING_LENGTH.
@@ -1347,4 +1357,7 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/03/16 11:07:39  cjm
+ * Initial revision
+ *
  */
