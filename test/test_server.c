@@ -324,7 +324,7 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 	Send_Reply(connection_handle,"Send_Fits_Reply:test_server compiled with GETFITS_DEBUG, test file written by server to test_server_getfits.fits.");
 #else
 	/* send a text message saying binary FITS image to follow. */
-	sprintf(reply_buff,"OK %ld",buffer_length);
+	sprintf(reply_buff,"0 %ld",buffer_length);
 	Send_Reply(connection_handle,reply_buff);
 	/* send image back to the client */
 	fprintf(stdout,"server: about to send binary message of length '%d'\n",buffer_length);

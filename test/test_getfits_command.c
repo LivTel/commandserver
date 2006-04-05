@@ -107,10 +107,11 @@ int main(int argc, char* argv[])
 		return 6;
 	}
 	printf("client: reply: %s\n", reply_string);
-	/* parse text reply, if not OK print message and exit. */
-	retval = sscanf(reply_string,"OK %ld",&bytes_expected);
+	/* parse text reply, if it does not start with '0' print message and exit. */
+	retval = sscanf(reply_string,"0 %ld",&bytes_expected);
 	if(retval != 1)
 	{
+		fprintf(stderr,"client: reply was: %s.\n",reply_string);
 		fprintf(stderr,"client: Server will not return FITS file:exiting.\n");
 		free(reply_string);
 		Command_Server_Close_Client(&handle);
