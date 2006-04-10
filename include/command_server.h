@@ -16,6 +16,11 @@
 #endif
 
 /**
+ * The number of nanoseconds in one millisecond. A struct timespec has fields in nanoseconds.
+ */
+#define COMMAND_SERVER_ONE_MILLISECOND_NS	(1000000)
+
+/**
  * Value to pass into logging calls, used for general code logging.
  * @see #CCD_Global_Log
  */
@@ -62,6 +67,9 @@ extern int Command_Server_Log_Filter_Level_Absolute(int level,char *string);
 extern int Command_Server_Log_Filter_Level_Bitwise(int level,char *string);
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/03 13:57:13  cjm
+ * Added Command_Server_Is_Error.
+ *
  * Revision 1.1  2006/03/16 11:11:32  cjm
  * Initial revision
  *
