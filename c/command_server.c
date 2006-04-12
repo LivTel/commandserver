@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.2 2006-04-03 13:57:19 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.3 2006-04-12 14:29:56 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.2 $
+ * @revision $Revision: 1.3 $
  */
 
 /**
@@ -187,7 +187,8 @@ struct Command_Server_Data_Struct
 
 /* internal functions */
 static void *Command_Server_Server_Connection_Thread(void *user_arg);
-
+static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffer_length);
+static int Read_Binary_Buffer(Command_Server_Handle_T handle,void *data_buffer,size_t data_buffer_length);
 
 
 /*===========================================================================*/
@@ -230,7 +231,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.2 2006-04-03 13:57:19 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.3 2006-04-12 14:29:56 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -377,6 +378,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 	char hostname[256],host_ip[256];
 	Command_Server_Server_Connection_Context_T *connection_context = NULL;
 	pthread_t new_thread;
+	pthread_attr_t attr;
 	struct timespec select_timeout = {0,SOCKET_TIMEOUT};
 	fd_set read_fds,write_fds,except_fds;
 
@@ -588,9 +590,11 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 					  "Command_Server_Start_Server: connection accepted: "
 					  "about to create pthread %d",n_pthreads++);
 #endif
-
-		/* create the thread with default attributes */    
-		if((perr = pthread_create(&new_thread,NULL,&Command_Server_Server_Connection_Thread,
+		/* create the thread with detatched attrributes */
+		/* these next two should really be error checked */
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+		if((perr = pthread_create(&new_thread,&attr,&Command_Server_Server_Connection_Thread,
 					     (void *)connection_context)) != 0)
 		{
 			Command_Server_Error_Number = 28;
@@ -604,22 +608,6 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 #ifdef COMMAND_SERVER_DEBUG
 		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Start_Server: started thread.");
 #endif
-		/* detach the thread to stop us running out of resources */
-		perr = pthread_detach(new_thread);
-		if(perr != 0)
-		{
-			Command_Server_Error_Number = 40;
-			sprintf(Command_Server_Error_String,
-				 "Command_Server_Start_Server: detaching thread failed: %s",
-				 strerror(perr));
-			Command_Server_Error();
-			continue;
-		}
-
-#ifdef COMMAND_SERVER_DEBUG
-		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Start_Server: started thread.");
-#endif
-
 	} /* end while */
 	/* free resources and shutdown */
 	(*server_context)->State = COMMAND_SERVER_SERVER_STATE_TERMINATED;
@@ -682,18 +670,18 @@ int Command_Server_Close_Server(Command_Server_Server_Context_T *server_context)
 
 /**
  * Routine to write the text message to an Command_Server_IO stream represented by
- * handle.  The string is sent with a terminator.
+ * handle. A newline is sent after the string, if it does not altready contain one.
  * Command_Server_Read_Message will read a mesage sent with this routine.
  * @param handle The IO handle used to make communications
  * @param message A NULL terminated character string, that should not be NULL.
  * @return the success state of this function call
  * @see #Command_Server_Read_Message
  * @see #COMMAND_SERVER_MESSAGE_SIZE_LENGTH
+ * @see #Write_Buffer
  */
 int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 {
-	size_t message_block_len,bytes_written,total_bytes_written;
-	int i;
+	char *ch_ptr = NULL;
 
 	if(handle == NULL)
 	{
@@ -715,34 +703,17 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: about to send '%s'.",
 				  message);
 #endif
-	total_bytes_written = 0;
-	while(total_bytes_written < (strlen(message)+1))
+	if(!Write_Buffer(handle,message,strlen(message)))
+		return FALSE;
+	/* check newline, if not already sent send one */
+	ch_ptr = strchr(message,'\n');
+	if(ch_ptr == NULL)
 	{
-		bytes_written = write(handle->Socket_fd,message+total_bytes_written,
-				      (strlen(message)+1)-total_bytes_written);
-		if(bytes_written == -1)
-		{
-			i = errno;
-			Command_Server_Error_Number = 3;
-			sprintf(Command_Server_Error_String,
-				"Command_Server_Write_Message: write error(%ld + %ld/%d : %s).",
-				total_bytes_written,bytes_written,strlen(message)+1,strerror(i));
-			return(FALSE);
-		}
-		if(bytes_written == 0)
-		{
-			Command_Server_Error_Number = 47;
-			sprintf(Command_Server_Error_String,
-				"Command_Server_Write_Message: write returned 0 (EOF) after %ld of %ld bytes.",
-				total_bytes_written,strlen(message)+1);
-			return(FALSE);
-		}
-		total_bytes_written += bytes_written;
+		if(!Write_Buffer(handle,"\n",strlen("\n")))
+			return FALSE;
 	}
 #ifdef COMMAND_SERVER_DEBUG
-	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
-				  "Command_Server_Write_Message: sent message (%d of %d).",
-				  bytes_written,strlen(message)+1);
+	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: sent message.");
 #endif
 	/* free allocated memory */
 	return(TRUE);
@@ -753,8 +724,7 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
  * handle.
  * @param handle The connection to communicate with
  * @param message The string to send
- * <b>NOTE:</b>The received message memory should be freed with:
- * <code>free(message);</code>
+ * <b>NOTE:</b>The received message memory should be freed with: <code>free(message);</code>
  * @see #COMMAND_SERVER_MESSAGE_SIZE_LENGTH
  * @see #Command_Server_Write_Message
  * @see #Command_Server_Write_Binary_Message
@@ -762,6 +732,7 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 {
 	size_t bytes_read,total_bytes_read;
+	char *ch_ptr = NULL;
 	char buff[256];
 	int done,read_errno,i;
 
@@ -805,11 +776,6 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 #ifdef COMMAND_SERVER_DEBUG
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message: Read %d bytes.",
 					  bytes_read);
-		/*
-		for(i=0; i< bytes_read; i++)
-			printf("%c",buff[i]);
-		printf("\n");
-		*/
 #endif
 		/* allocate message buffer */
 		if((*message) == NULL)
@@ -850,15 +816,6 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
 					  "Command_Server_Read_Message: Message now %s.",(*message));
 #endif
-		/* check if terminator has been read */
-		if(buff[bytes_read-1] == '\0')
-		{
-#ifdef COMMAND_SERVER_DEBUG
-			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
-						  "Command_Server_Read_Message: Detected input terminator.");
-#endif
-			done = TRUE;
-		}
 		/* check if EOF */
 		if(bytes_read == 0)
 		{
@@ -868,6 +825,28 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 #endif
 			done = TRUE;
 		}
+		/* check if new-line has been read */
+		if((*message) != NULL)
+		{
+			ch_ptr = strrchr((*message),'\n');
+			if(ch_ptr != NULL)
+			{
+#ifdef COMMAND_SERVER_DEBUG
+				Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message:"
+							  " Detected input newline at charcter %d of %d.",
+							  ch_ptr-(*message),total_bytes_read+bytes_read);
+#endif
+				/* remove ONLY last newline, others may be intentional */
+				(*message)[ch_ptr-(*message)] = '\0';
+				/* remove all CRs */
+				for(i=0;i<strlen((*message));i++)
+				{
+					if((*message)[i] == '\r')
+						(*message)[i] = '\0';
+				}
+				done = TRUE;
+			}/* end if newline found */
+		}/* end if message allocated */
 		/* increment total bytes read */
 		total_bytes_read += bytes_read;
 	}/* end while */
@@ -932,28 +911,8 @@ int Command_Server_Write_Binary_Message(Command_Server_Handle_T handle,void *dat
 				  "about to send buffer of %d bytes.",
 				  (data_buffer_length + IO_MESSAGE_SIZE_LENGTH) *sizeof(char));
 #endif
-	total_bytes_written = 0;
-	while(total_bytes_written < message_block_len)
-	{
-		bytes_written = write(handle->Socket_fd,message_block+total_bytes_written,
-				      message_block_len-total_bytes_written);
-		if(bytes_written == -1)
-		{
-			i = errno;
-			free(message_block);
-			Command_Server_Error_Number = 23;
-			sprintf(Command_Server_Error_String,
-				"Command_Server_Write_Binary_Message: write error(%d/%d : %s).",
-				bytes_written,message_block_len,strerror(i));
-			return(FALSE);
-		}
-#ifdef COMMAND_SERVER_DEBUG
-		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Write_Binary_Message: "
-					  "Last write wrote %ld bytes (starting at %ld byte).",
-					  bytes_written,total_bytes_written);
-#endif
-		total_bytes_written += bytes_written;
-	}/* end while not finished writing */
+	if(!Write_Buffer(handle,message_block,message_block_len))
+		return FALSE;
 #ifdef COMMAND_SERVER_DEBUG
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Binary_Message: "
 				  "sent buffer of length %d.",bytes_written);
@@ -974,6 +933,8 @@ int Command_Server_Write_Binary_Message(Command_Server_Handle_T handle,void *dat
  *                    data in the data_buffer.
  * @return The routine returns TRUE on success, and FALSE on failure.
  * @see #Command_Server_Write_Binary_Message
+ * @see #COMMAND_SERVER_ONE_MILLISECOND_NS
+ * @see #Read_Binary_Buffer
  */
 int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **data_buffer,
 					      size_t *data_buffer_length)
@@ -1009,16 +970,8 @@ int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **dat
 	(*data_buffer_length) = 0;
 	/* read byes containing length of rest of message */
 	/* should really be in a while loop, until total_types_read == IO_MESSAGE_SIZE_LENGTH */
-	bytes_read = read(handle->Socket_fd,(void *)message_length_buffer,IO_MESSAGE_SIZE_LENGTH);
-	if(bytes_read != IO_MESSAGE_SIZE_LENGTH)
-	{
-		int i = errno;
-		Command_Server_Error_Number = 43;
-		sprintf(Command_Server_Error_String,
-			"Command_Server_Read_Binary_Message: read error(%d bytes: %s).",
-			bytes_read,strerror(i));
-		return(FALSE);
-	}
+	if(!Read_Binary_Buffer(handle,message_length_buffer,IO_MESSAGE_SIZE_LENGTH))
+		return FALSE;
 	/* convert to integer */
 	memcpy(&message_length,message_length_buffer,IO_MESSAGE_SIZE_LENGTH);
 	message_length = ntohl(message_length);
@@ -1047,35 +1000,8 @@ int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **dat
 		return(FALSE);
 	}
 	/* read actual message */
-	total_bytes_read = 0;
-	while(total_bytes_read < (*data_buffer_length))
-	{
-		bytes_read = read(handle->Socket_fd,(*data_buffer)+total_bytes_read,
-				  (*data_buffer_length)-total_bytes_read);
-		if(bytes_read == -1)
-		{
-			i = errno;
-			Command_Server_Error_Number = 46;
-			sprintf(Command_Server_Error_String,"Command_Server_Read_Binary_Message: "
-				"read error(%d vs %d bytes: %s).",
-				bytes_read,(*data_buffer_length),strerror(i));
-			return(FALSE);
-		}
-		/* check if EOF */
-		if(bytes_read == 0)
-		{
-			Command_Server_Error_Number = 48;
-			sprintf(Command_Server_Error_String,"Command_Server_Read_Binary_Message: "
-				"Detected EOF (bytes_read == 0) after %ld of %ld bytes read.",
-				total_bytes_read,(*data_buffer_length));
-			return(FALSE);
-		}
-#ifdef COMMAND_SERVER_DEBUG
-		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Binary_Message: "
-				  "Last read %ld bytes (starting at %ld byte).",bytes_read,total_bytes_read);
-#endif
-		total_bytes_read += bytes_read;
-	}
+	if(!Read_Binary_Buffer(handle,(*data_buffer),(*data_buffer_length)))
+		return FALSE;
 #ifdef COMMAND_SERVER_DEBUG
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Read_Binary_Message: "
 				  "received %d bytes of data.",message_length);
@@ -1083,7 +1009,6 @@ int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **dat
 	return(TRUE);
 
 }
-
 
 /**
  * Routine to print out the error to stderr.
@@ -1336,6 +1261,86 @@ static void *Command_Server_Server_Connection_Thread(void *user_arg)
 }
 
 /**
+ * Write the contents of the buffer to a socket specified by handle.
+ * Calls <b>write</b> in a loop until all the bytes are written, or an error occurs.
+ * @param handle The handle containing the socket to write to.
+ * @param buffer A pointer to an area of memory containing something to write.
+ * @param buffer_length The length of data in the buffer to be written, in bytes.
+ * @return The routine returns TRUE on success, and FALSE on failure.
+ * @see #Command_Server_Handle_T
+ */
+static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffer_length)
+{
+	size_t total_bytes_written,bytes_written;
+	int write_errno;
+
+	total_bytes_written = 0;
+	while(total_bytes_written < buffer_length)
+	{
+		bytes_written = write(handle->Socket_fd,buffer+total_bytes_written,
+				      buffer_length-total_bytes_written);
+		if(bytes_written == -1)
+		{
+			write_errno = errno;
+			Command_Server_Error_Number = 3;
+			sprintf(Command_Server_Error_String,
+				"Write_Buffer: write error(%ld + %ld/%d : %s).",
+				total_bytes_written,bytes_written,buffer_length,strerror(write_errno));
+			return(FALSE);
+		}
+		total_bytes_written += bytes_written;
+	}
+	return TRUE;
+}
+
+/**
+ * Read (potentially) binary data into the specified (previously allocated) buffer.
+ * @param handle The socket handle.
+ * @param data_buffer An already allocated or fixed buffer of at least data_buffer_length length bytes.
+ *        On successful return from the routine this will contain data_buffer_length bytes of data 
+ *        read from the socket.
+ * @param data_buffer_length The length of the data_buffer, and also the number of bytes to read from the socket
+ *        into the buffer.
+ * @return The routine returns TRUE on success and FALSE on failure.
+ * @see #Command_Server_Handle_T
+ */
+static int Read_Binary_Buffer(Command_Server_Handle_T handle,void *data_buffer,size_t data_buffer_length)
+{
+	size_t total_bytes_read,bytes_read;
+	int read_errno;
+
+	total_bytes_read = 0;
+	while(total_bytes_read < data_buffer_length)
+	{
+		bytes_read = read(handle->Socket_fd,(void *)(data_buffer+total_bytes_read),
+				  data_buffer_length-total_bytes_read);
+		if(bytes_read == -1)
+		{
+			read_errno = errno;
+			Command_Server_Error_Number = 43;
+			sprintf(Command_Server_Error_String,"Read_Binary_Buffer:read error(%d vs %d bytes: %s).",
+				total_bytes_read,data_buffer_length,strerror(read_errno));
+			return(FALSE);
+		}
+		/* check if EOF */
+		if(bytes_read == 0)
+		{
+			Command_Server_Error_Number = 49;
+			sprintf(Command_Server_Error_String,"Read_Binary_Buffer: "
+				"Detected EOF (bytes_read == 0) after %ld of %ld bytes read.",
+				total_bytes_read,data_buffer_length);
+			return(FALSE);
+		}
+#ifdef COMMAND_SERVER_DEBUG
+		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Read_Binary_Buffer: "
+				  "Last read %ld bytes (starting at %ld byte).",bytes_read,total_bytes_read);
+#endif
+		total_bytes_read += bytes_read;
+	}/* end while */
+	return TRUE;
+}
+
+/**
  * Internal routine to get the current time in a string. The string is returned in the format
  * '01/01/2000 13:59:59', or the string "Unknown time" if the routine failed.
  * @param time_string The string to fill with the current time.
@@ -1357,6 +1362,9 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/03 13:57:19  cjm
+ * Added Command_Server_Is_Error.
+ *
  * Revision 1.1  2006/03/16 11:07:39  cjm
  * Initial revision
  *
