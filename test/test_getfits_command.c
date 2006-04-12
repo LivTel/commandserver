@@ -41,18 +41,23 @@ int main(int argc, char* argv[])
 	int c,port,retval,my_errno;     
 	char *hostname; 
 	char *filename; 
+	char command_string[256] = "getfits";
 	Command_Server_Handle_T handle;
 	char *reply_string;
 	void *data_buffer = NULL;
 	long bytes_expected;
 	size_t data_buffer_length = 0;
+	char error_buff[256];
 
 	port = -1;
 	hostname = "localhost";
-	while ((c = getopt(argc, argv, "f:h:p:")) != EOF)
+	while ((c = getopt(argc, argv, "c:f:h:p:")) != EOF)
 	{
 		switch(c)
 		{
+			case 'c':
+				strcpy(command_string,optarg);
+				break;
 			case 'f':
 				filename = strdup(optarg);
 				break;
@@ -88,45 +93,44 @@ int main(int argc, char* argv[])
 		return 4;
 	}
 
-	fprintf(stdout,"client: about to send 'getfits' to server.\n");
-	retval = Command_Server_Write_Message(handle,"getfits");
+	fprintf(stdout,"client: about to send '%s' to server.\n",command_string);
+	retval = Command_Server_Write_Message(handle,command_string);
 	if(retval == FALSE)
 	{
 		Command_Server_Error();
 		Command_Server_Close_Client(&handle);
 		return 5;
 	}
-	fprintf(stdout,"client: sent 'getfits' to server\n");
-
-	fprintf(stdout,"client: about to get text reply...\n");
-	retval = Command_Server_Read_Message(handle, &reply_string);
-	if(retval == FALSE)
-	{
-		Command_Server_Error();
-		Command_Server_Close_Client(&handle);
-		return 6;
-	}
-	printf("client: reply: %s\n", reply_string);
-	/* parse text reply, if it does not start with '0' print message and exit. */
-	retval = sscanf(reply_string,"0 %ld",&bytes_expected);
-	if(retval != 1)
-	{
-		fprintf(stderr,"client: reply was: %s.\n",reply_string);
-		fprintf(stderr,"client: Server will not return FITS file:exiting.\n");
-		free(reply_string);
-		Command_Server_Close_Client(&handle);
-		return 7;
-	}
-	free(reply_string);
+	fprintf(stdout,"client: sent '%s' to server\n",command_string);
+	fprintf(stdout,"client: about to get reply...\n");
 	/* get binary data */
 	data_buffer = NULL;
 	data_buffer_length = 0;
+	printf("client: Reading binary data.\n");
 	retval = Command_Server_Read_Binary_Message(handle,&data_buffer,&data_buffer_length);
 	if(retval == FALSE)
 	{
 		Command_Server_Error();
 		Command_Server_Close_Client(&handle);
 		return 6;
+	}
+	printf("client: Read binary data of length %ld bytes.\n",data_buffer_length);
+	if(data_buffer_length < 6)
+	{
+		printf("client: Data buffer was too short to be a FITS file(%d).\n",data_buffer_length);
+		Command_Server_Close_Client(&handle);
+		return 7;
+	}
+	if(strncmp(data_buffer,"SIMPLE",6)!=0)
+	{
+		printf("client: FITS file was not returned.\n");
+		strncpy(error_buff,data_buffer,min(256,data_buffer_length));
+		error_buff[min(256-1,data_buffer_length-1)] = '\0';
+		printf("client: returned error: %s.\n",error_buff);
+		if(data_buffer != NULL)
+			free(data_buffer);
+		Command_Server_Close_Client(&handle);
+		return 7;
 	}
 	/* and save binary data to filename */
 	if(filename != NULL)
@@ -179,5 +183,6 @@ int main(int argc, char* argv[])
 static void help(void)
 {
 	printf("send_command help:\n");
-	printf("send_command -h <hostname> -p <port number> -f <FITS filename>\n");
+	printf("send_command -h <hostname> -p <port number> -f <FITS filename> -c <getfits command>\n");
+	printf("Use commands:'getfits field' or 'getfits guide'\n");
 }
