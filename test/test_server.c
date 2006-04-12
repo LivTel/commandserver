@@ -234,13 +234,14 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 	size_t buffer_length = 0;
 	long axes[ 2 ];
 	unsigned short row_data[1024];
-	char reply_buff[16];
+	char reply_buff[256];
 
 	buffer_length = 288000;
 	buffer = (void*)malloc(buffer_length);
 	if(buffer == NULL)
 	{
-		Send_Reply(connection_handle,"Send_Fits_Reply:failed to allocate buffer.");
+		sprintf(reply_buff,"Send_Fits_Reply:failed to allocate buffer.");
+		Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 		fprintf(stderr,"Send_Fits_Reply:failed to allocate buffer (%d).\n",buffer_length);
 		return FALSE;
 	}
@@ -254,7 +255,8 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 #endif
 	if(retval)
 	{
-		Send_Reply(connection_handle,"Send_Fits_Reply : Creating FITS memfile failed.");
+		sprintf(reply_buff,"Send_Fits_Reply : Creating FITS memfile failed.");
+		Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 		fprintf(stderr,"Send_Fits_Reply : Creating FITS memfile failed.\n");
 		fits_report_error(stderr,cfitsio_status);
 		return FALSE;
@@ -265,7 +267,8 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 	retval = fits_create_img(fits_fp,USHORT_IMG,2,axes,&cfitsio_status);
 	if(retval)
 	{
-		Send_Reply(connection_handle,"Send_Fits_Reply : Creating FITS image failed.");
+		sprintf(reply_buff,"Send_Fits_Reply : Creating FITS image failed.");
+		Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 		fprintf(stderr,"Send_Fits_Reply : Creating FITS image failed.\n");
 		fits_report_error(stderr,cfitsio_status);
 		if(buffer != NULL)
@@ -287,7 +290,8 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 		retval = fits_write_img(fits_fp,TUSHORT,(i*1024)+1,1024,row_data,&cfitsio_status);
 		if(retval)
 		{
-			Send_Reply(connection_handle,"Send_Fits_Reply : Writing FITS image row failed.");
+			sprintf(reply_buff,"Send_Fits_Reply : Writing FITS image row failed.");
+			Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 			fprintf(stderr,"Send_Fits_Reply : Writing FITS image row failed.\n");
 			fits_report_error(stderr,cfitsio_status);
 			if(buffer != NULL)
@@ -296,24 +300,12 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 		}
 	}
 	/* ensure data we have written is in the actual data buffer, not CFITSIO's internal buffers */
-	/* This is an alternative to closing the CFITSIO FITS file
-	retval = fits_flush_file(fits_fp,&cfitsio_status);
-	if(retval)
-	{
-		Send_Reply(connection_handle,"Send_Fits_Reply : Flushing FITS file failed.");
-		fprintf(stderr,"Send_Fits_Reply : Flushing FITS file failed.\n");
-		fits_report_error(stderr,cfitsio_status);
-		if(buffer != NULL)
-			free(buffer);
-		return FALSE;
-	}
-	*/
-	/* ensure data we have written is in the actual data buffer, not CFITSIO's internal buffers */
 	/* closing the file ensures this. */ 
 	retval = fits_close_file(fits_fp,&cfitsio_status);
 	if(retval)
 	{
-		Send_Reply(connection_handle,"Send_Fits_Reply : Closing FITS file failed.");
+		sprintf(reply_buff,"Send_Fits_Reply : Closing FITS file failed.");
+		Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 		fprintf(stderr,"Send_Fits_Reply : Closing FITS file failed.\n");
 		fits_report_error(stderr,cfitsio_status);
 		if(buffer != NULL)
@@ -321,11 +313,9 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 		return FALSE;
 	}
 #ifdef GETFITS_DEBUG
-	Send_Reply(connection_handle,"Send_Fits_Reply:test_server compiled with GETFITS_DEBUG, test file written by server to test_server_getfits.fits.");
+	sprintf(reply_buff,"Send_Fits_Reply:test_server compiled with GETFITS_DEBUG, test file written by server to test_server_getfits.fits.");
+	Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 #else
-	/* send a text message saying binary FITS image to follow. */
-	sprintf(reply_buff,"0 %ld",buffer_length);
-	Send_Reply(connection_handle,reply_buff);
 	/* send image back to the client */
 	fprintf(stdout,"server: about to send binary message of length '%d'\n",buffer_length);
 	retval = Command_Server_Write_Binary_Message(connection_handle,buffer,buffer_length);
