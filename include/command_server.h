@@ -31,6 +31,21 @@
  */
 #define COMMAND_SERVER_LOG_BIT_DETAIL	(1<<1)
 
+/* macros */
+#ifndef max
+/**
+ * Return maximum of two inputs.
+ */
+#define max(A,B)                         ((A) > (B) ? (A) : (B))
+#endif
+
+#ifndef min
+/**
+ * Return minimum of two inputs.
+ */
+#define min(A,B)                         ((A) < (B) ? (A) : (B))
+#endif
+
 /* typedefs */
 /**
  * Typedef for server context pointer. The structure is not externally defined,
@@ -67,6 +82,9 @@ extern int Command_Server_Log_Filter_Level_Absolute(int level,char *string);
 extern int Command_Server_Log_Filter_Level_Bitwise(int level,char *string);
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/10 16:41:43  cjm
+ * Added COMMAND_SERVER_ONE_MILLISECOND_NS.
+ *
  * Revision 1.2  2006/04/03 13:57:13  cjm
  * Added Command_Server_Is_Error.
  *
