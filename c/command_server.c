@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.3 2006-04-12 14:29:56 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.4 2006-05-08 18:31:51 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.3 $
+ * @revision $Revision: 1.4 $
  */
 
 /**
@@ -38,6 +38,7 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h> /* TCP_NODELAY */
 
 #include <errno.h>
 #include <netdb.h>
@@ -231,7 +232,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.3 2006-04-12 14:29:56 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.4 2006-05-08 18:31:51 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -248,7 +249,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 {
 	char host_ip[256];
 	struct hostent *host;
-	int i;
+	int retval,i,flag;
 
 	if(hostname == NULL)
 	{
@@ -271,7 +272,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 			"Command_Server_Open_Client: failed allocating Command_Server_Handle_Struct");
 		return(FALSE);
 	}
-	(*handle)->Socket_fd = socket(PF_INET,SOCK_STREAM,0);
+	(*handle)->Socket_fd = socket(AF_INET,SOCK_STREAM,0);
 	if((*handle)->Socket_fd == -1)
 	{
 		i = errno;
@@ -286,10 +287,29 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 			 hostname,port,strerror(i));
 		return(FALSE);
 	}
+	/* disable nagle's algorithm */
+	/* diddly
+	flag = 1;
+	retval = setsockopt((*handle)->Socket_fd,IPPROTO_TCP,TCP_NODELAY,(char *) &flag,sizeof(int));
+	if(retval == -1)
+	{
+		i = errno;
+#ifdef COMMAND_SERVER_DEBUG
+		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,
+				   "Command_Server_Open_Client:failed setting socket options.");
+#endif
+		Command_Server_Error_Number = 40;
+		sprintf(Command_Server_Error_String,
+			 "Command_Server_Open_Client: setsockopt error(%d,%s).",i,strerror(i));
+		return(FALSE);
+	}
+	*/
+	/* get IP address from hostname */
 	host = gethostbyname(hostname);
 	strcpy(host_ip,inet_ntoa(*(struct in_addr *)(host->h_addr_list[0])));
 
-	(*handle)->Address.sin_family = PF_INET;
+	memset(&((*handle)->Address),0,sizeof(struct sockaddr_in));
+	(*handle)->Address.sin_family = AF_INET;
 	(*handle)->Address.sin_addr.s_addr = inet_addr(host_ip);
 	(*handle)->Address.sin_port = htons(port);
 
@@ -434,7 +454,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		return(FALSE);
 	}
 
-	(*server_context)->Listener_Handle->Socket_fd = socket(PF_INET,SOCK_STREAM,0);
+	(*server_context)->Listener_Handle->Socket_fd = socket(AF_INET,SOCK_STREAM,0);
 	if((*server_context)->Listener_Handle->Socket_fd == -1)
 	{
 		i = errno;
@@ -473,7 +493,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 	}
 
 	strcpy(host_ip,inet_ntoa(*(struct in_addr *)(host->h_addr_list[0])));
-	(*server_context)->Listener_Handle->Address.sin_family = PF_INET;
+	(*server_context)->Listener_Handle->Address.sin_family = AF_INET;
 	(*server_context)->Listener_Handle->Address.sin_addr.s_addr = inet_addr(host_ip);
 	(*server_context)->Listener_Handle->Address.sin_port = htons(*port);
 
@@ -810,9 +830,27 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 					  "strncpy(%p+%d,buff,%d).\n",(*message),
 					  total_bytes_read,bytes_read);
 #endif
+		/*
+#ifdef COMMAND_SERVER_DEBUG
+		for(i=0;i<bytes_read;i++)
+		{
+			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
+						  "Command_Server_Read_Message: Message[%d] = %d (%c).",i,
+						  buff[i],buff[i]);
+		}
+#endif
+		*/
 		strncpy((*message)+total_bytes_read,buff,bytes_read);
 		(*message)[total_bytes_read+bytes_read] = '\0';
 #ifdef COMMAND_SERVER_DEBUG
+		/*
+		for(i=0;i<total_bytes_read+bytes_read;i++)
+		{
+			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
+						  "Command_Server_Read_Message: Message[%d] = %d (%c).",i,
+						  (*message)[i],(*message)[i]);
+		}
+		*/
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
 					  "Command_Server_Read_Message: Message now %s.",(*message));
 #endif
@@ -1272,7 +1310,7 @@ static void *Command_Server_Server_Connection_Thread(void *user_arg)
 static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffer_length)
 {
 	size_t total_bytes_written,bytes_written;
-	int write_errno;
+	int write_errno,retval;
 
 	total_bytes_written = 0;
 	while(total_bytes_written < buffer_length)
@@ -1362,6 +1400,12 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/12 14:29:56  cjm
+ * Rewritten.
+ * Now uses newline for end of text determination - now compatible with telnet.
+ * Binary transfers use new subroutines - figured out a new strategy for
+ * FITS image transfer.
+ *
  * Revision 1.2  2006/04/03 13:57:19  cjm
  * Added Command_Server_Is_Error.
  *
