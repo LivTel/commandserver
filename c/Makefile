@@ -1,4 +1,4 @@
-# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.4 2006-03-16 11:47:01 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.5 2006-05-26 10:06:53 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
@@ -46,7 +46,7 @@ $(DOCS): $(SRCS)
 $(DOCS) : $(SRCS)
 
 depend:
-	makedepend -- $(CFLAGS) -- $(SRCS)
+	makedepend -p$(BINDIR)/ -- $(CFLAGS) -- $(SRCS)
 
 clean:
 	$(RM) $(RM_OPTIONS) $(EXES) $(OBJS) $(TIDY_OPTIONS)
