@@ -203,7 +203,7 @@ void Test_Server_Connection_Callback(Command_Server_Handle_T connection_handle)
 
 /**
  * Send a message back to the client.
- * @param connection_handle Globus_io connection handle for this thread.
+ * @param connection_handle Connection handle for this thread.
  * @param reply_message The message to send.
  */
 static void Send_Reply(Command_Server_Handle_T connection_handle,char *reply_message)
@@ -223,7 +223,7 @@ static void Send_Reply(Command_Server_Handle_T connection_handle,char *reply_mes
 
 /**
  * Send a binary FITS message back to the client.
- * @param connection_handle Globus_io connection handle for this thread.
+ * @param connection_handle Connection handle for this thread.
  * @return The routine returns TRUE on success and FALSE on failure.
  */
 static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
