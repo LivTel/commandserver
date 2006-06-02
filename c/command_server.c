@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.5 2006-06-02 13:17:23 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.6 2006-06-02 13:42:46 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.5 $
+ * @revision $Revision: 1.6 $
  */
 
 /**
@@ -232,7 +232,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.5 2006-06-02 13:17:23 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.6 2006-06-02 13:42:46 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -869,16 +869,21 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		/* check if new-line has been read */
 		if((*message) != NULL)
 		{
-			ch_ptr = strrchr((*message),'\n');
-			if(ch_ptr != NULL)
+			/* diddly
+			** What happens is there is a new-line at the last character of the first read
+			** we do, even though the reply is multi-line and the next read would produce more characters.
+			** NB If we don't have a new-line test here, the server Read hangs forever as
+			** EOF is not set.
+			*/
+			if((*message)[strlen((*message))-1] == '\n')
 			{
 #ifdef COMMAND_SERVER_DEBUG
 				Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message:"
 							  " Detected input newline at charcter %d of %d.",
-							  ch_ptr-(*message),total_bytes_read+bytes_read);
+							  strlen((*message))-1,total_bytes_read+bytes_read);
 #endif
 				/* remove ONLY last newline, others may be intentional */
-				(*message)[ch_ptr-(*message)] = '\0';
+				(*message)[strlen((*message))-1] = '\0';
 				/* remove all CRs */
 				for(i=0;i<strlen((*message));i++)
 				{
@@ -887,6 +892,14 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 				}
 				done = TRUE;
 			}/* end if newline found */
+			else
+			{
+#ifdef COMMAND_SERVER_DEBUG
+				Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message:"
+							  "Last character is message currently %c at index %ld.",
+							  (*message)[strlen((*message))-1],strlen((*message))-1);
+#endif
+			}
 		}/* end if message allocated */
 		/* increment total bytes read */
 		total_bytes_read += bytes_read;
@@ -1416,6 +1429,9 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/06/02 13:17:23  cjm
+ * Fixed log buffer overflow when logging long text message writes.
+ *
  * Revision 1.4  2006/05/08 18:31:51  cjm
  * Attempts to fix  a bug that didn't exist (dodgy alias).
  * Added a load of commented out uber-debugging, however.
