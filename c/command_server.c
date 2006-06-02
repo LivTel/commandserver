@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.4 2006-05-08 18:31:51 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.5 2006-06-02 13:17:23 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.4 $
+ * @revision $Revision: 1.5 $
  */
 
 /**
@@ -64,7 +64,7 @@
  * Length of Command_Server_Error_String.
  * @see #Command_Server_Error_String
  */
-#define COMMAND_SERVER_ERROR_STRING_LENGTH 	(512)
+#define COMMAND_SERVER_ERROR_STRING_LENGTH 	(1024)
 
 /**
  * This define is the length of the server socket timeout in nanoseconds.
@@ -232,7 +232,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.4 2006-05-08 18:31:51 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.5 2006-06-02 13:17:23 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -717,11 +717,10 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 			 "Command_Server_Write_Message:message was NULL.");
 		return(FALSE);
 	}
-
 	/* send message block */
 #ifdef COMMAND_SERVER_DEBUG
-	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: about to send '%s'.",
-				  message);
+	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message:"
+				  "about to send '%.80s'... of length %ld bytes .",message,strlen(message));
 #endif
 	if(!Write_Buffer(handle,message,strlen(message)))
 		return FALSE;
@@ -729,6 +728,10 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 	ch_ptr = strchr(message,'\n');
 	if(ch_ptr == NULL)
 	{
+#ifdef COMMAND_SERVER_DEBUG
+		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: "
+					  "about to write newline (seperately) to handle.");
+#endif
 		if(!Write_Buffer(handle,"\n",strlen("\n")))
 			return FALSE;
 	}
@@ -852,7 +855,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		}
 		*/
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
-					  "Command_Server_Read_Message: Message now %s.",(*message));
+					  "Command_Server_Read_Message: Message now %.80s...",(*message));
 #endif
 		/* check if EOF */
 		if(bytes_read == 0)
@@ -893,7 +896,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 	/* Note, this next debug line is dangerous with binary data */
 #ifdef COMMAND_SERVER_DEBUG
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
-				  "Command_Server_Read_Message: received '%s'",*message);
+				  "Command_Server_Read_Message: received '%.80s'...",*message);
 #endif
 	return(TRUE);
 }
@@ -1312,9 +1315,18 @@ static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffe
 	size_t total_bytes_written,bytes_written;
 	int write_errno,retval;
 
+#ifdef COMMAND_SERVER_DEBUG
+	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: About to write %ld bytes.",
+				  buffer_length);
+#endif
 	total_bytes_written = 0;
 	while(total_bytes_written < buffer_length)
 	{
+#ifdef COMMAND_SERVER_DEBUG
+		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: "
+					  "Writing %ld bytes starting at offset %ld.",
+					  buffer_length-total_bytes_written,total_bytes_written);
+#endif
 		bytes_written = write(handle->Socket_fd,buffer+total_bytes_written,
 				      buffer_length-total_bytes_written);
 		if(bytes_written == -1)
@@ -1326,6 +1338,10 @@ static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffe
 				total_bytes_written,bytes_written,buffer_length,strerror(write_errno));
 			return(FALSE);
 		}
+#ifdef COMMAND_SERVER_DEBUG
+		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: "
+					  "Wrote %ld bytes.",bytes_written);
+#endif
 		total_bytes_written += bytes_written;
 	}
 	return TRUE;
@@ -1400,6 +1416,10 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/05/08 18:31:51  cjm
+ * Attempts to fix  a bug that didn't exist (dodgy alias).
+ * Added a load of commented out uber-debugging, however.
+ *
  * Revision 1.3  2006/04/12 14:29:56  cjm
  * Rewritten.
  * Now uses newline for end of text determination - now compatible with telnet.
