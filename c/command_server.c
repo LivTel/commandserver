@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.6 2006-06-02 13:42:46 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.7 2006-10-19 10:15:09 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.6 $
+ * @revision $Revision: 1.7 $
  */
 
 /**
@@ -232,7 +232,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.6 2006-06-02 13:42:46 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.7 2006-10-19 10:15:09 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -276,7 +276,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 	if((*handle)->Socket_fd == -1)
 	{
 		i = errno;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,
 				   "Command_Server_Open_Client:failed creating socket.");
 #endif
@@ -294,7 +294,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 	if(retval == -1)
 	{
 		i = errno;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,
 				   "Command_Server_Open_Client:failed setting socket options.");
 #endif
@@ -313,7 +313,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 	(*handle)->Address.sin_addr.s_addr = inet_addr(host_ip);
 	(*handle)->Address.sin_port = htons(port);
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
 				  "Command_Server_Open_Client: trying to connect to %s [%s:%d]  ...  ",
 				  hostname,host_ip,port);
@@ -323,7 +323,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 		   sizeof((*handle)->Address)) == -1)
 	{
 		i = errno;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Open_Client: connect FAILED");
 #endif
 
@@ -334,7 +334,7 @@ int Command_Server_Open_Client(char *hostname,int port,Command_Server_Handle_T *
 		return(FALSE);
 	}
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 	Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Open_Client: connect OK");
 #endif
 	return(TRUE);
@@ -390,7 +390,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 				(Command_Server_Handle_T connection_handle),
 				Command_Server_Server_Context_T *server_context)
 {
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 	static int n_pthreads = 0;
 #endif
 	int adlen,sel,perr,i;
@@ -438,7 +438,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 	(*server_context)->State = COMMAND_SERVER_SERVER_STATE_NOT_STARTED;
 
 	/* initialise */
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
 				  "Command_Server_Start_Server: trying to listen on port %hu",(*port));
 #endif
@@ -528,7 +528,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		return(FALSE);
 	}
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
 				  "Command_Server_Start_Server: listening on port %hu",*port);
 #endif
@@ -605,7 +605,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 				(struct sockaddr *)&(connection_context->Connection_Handle->Address),
 				(socklen_t *)&adlen);
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
 					  "Command_Server_Start_Server: connection accepted: "
 					  "about to create pthread %d",n_pthreads++);
@@ -625,7 +625,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 			continue;
 		}
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 0
 		Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Start_Server: started thread.");
 #endif
 	} /* end while */
@@ -718,7 +718,7 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 		return(FALSE);
 	}
 	/* send message block */
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 5
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message:"
 				  "about to send '%.80s'... of length %ld bytes .",message,strlen(message));
 #endif
@@ -728,14 +728,14 @@ int Command_Server_Write_Message(Command_Server_Handle_T handle,char *message)
 	ch_ptr = strchr(message,'\n');
 	if(ch_ptr == NULL)
 	{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: "
 					  "about to write newline (seperately) to handle.");
 #endif
 		if(!Write_Buffer(handle,"\n",strlen("\n")))
 			return FALSE;
 	}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 5
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Message: sent message.");
 #endif
 	/* free allocated memory */
@@ -783,7 +783,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 	done = FALSE;
 	while(done == FALSE)
 	{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 5
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Read_Message: "
 					  "Reading from Socket Fd %d.",handle->Socket_fd);
 #endif
@@ -796,14 +796,14 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 				 bytes_read,total_bytes_read,strerror(read_errno));
 			return(FALSE);
 		}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 7
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message: Read %d bytes.",
 					  bytes_read);
 #endif
 		/* allocate message buffer */
 		if((*message) == NULL)
 		{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 7
 			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
 						  "Command_Server_Read_Message: "
 						  "Allocating start of buffer length %d\n",
@@ -813,7 +813,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		}
 		else
 		{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 7
 			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message: "
 						  "Reallocating buffer length %d",
 						  (total_bytes_read + bytes_read + 1));
@@ -828,13 +828,13 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 				"Command_Server_Read_Message: memory allocation error: %s",strerror(i));
 			return(FALSE);
 		}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 8
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message: "
 					  "strncpy(%p+%d,buff,%d).\n",(*message),
 					  total_bytes_read,bytes_read);
 #endif
 		/*
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 10
 		for(i=0;i<bytes_read;i++)
 		{
 			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
@@ -845,7 +845,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		*/
 		strncpy((*message)+total_bytes_read,buff,bytes_read);
 		(*message)[total_bytes_read+bytes_read] = '\0';
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 		/*
 		for(i=0;i<total_bytes_read+bytes_read;i++)
 		{
@@ -860,7 +860,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 		/* check if EOF */
 		if(bytes_read == 0)
 		{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 7
 			Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,
 						  "Command_Server_Read_Message: Detected EOF (bytes_read == 0).");
 #endif
@@ -877,7 +877,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 			*/
 			if((*message)[strlen((*message))-1] == '\n')
 			{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 7
 				Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message:"
 							  " Detected input newline at charcter %d of %d.",
 							  strlen((*message))-1,total_bytes_read+bytes_read);
@@ -894,7 +894,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 			}/* end if newline found */
 			else
 			{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 				Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Command_Server_Read_Message:"
 							  "Last character is message currently %c at index %ld.",
 							  (*message)[strlen((*message))-1],strlen((*message))-1);
@@ -907,7 +907,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 	/* do something with message */
 	(*message)[total_bytes_read] = '\0';
 	/* Note, this next debug line is dangerous with binary data */
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 5
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,
 				  "Command_Server_Read_Message: received '%.80s'...",*message);
 #endif
@@ -960,14 +960,14 @@ int Command_Server_Write_Binary_Message(Command_Server_Handle_T handle,void *dat
 	memcpy((void *)((char *)message_block + IO_MESSAGE_SIZE_LENGTH),
 		data_buffer,data_buffer_length);
 	/* send message block */
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Binary_Message: "
 				  "about to send buffer of %d bytes.",
 				  (data_buffer_length + IO_MESSAGE_SIZE_LENGTH) *sizeof(char));
 #endif
 	if(!Write_Buffer(handle,message_block,message_block_len))
 		return FALSE;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Write_Binary_Message: "
 				  "sent buffer of length %d.",bytes_written);
 #endif
@@ -1038,7 +1038,7 @@ int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **dat
 		return(FALSE);
 	}
 	(*data_buffer_length) = message_length;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Read_Binary_Message: "
 				  "message length is '%d'.",message_length);
 #endif
@@ -1056,7 +1056,7 @@ int Command_Server_Read_Binary_Message(Command_Server_Handle_T handle,void **dat
 	/* read actual message */
 	if(!Read_Binary_Buffer(handle,(*data_buffer),(*data_buffer_length)))
 		return FALSE;
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Read_Binary_Message: "
 				  "received %d bytes of data.",message_length);
 #endif
@@ -1294,7 +1294,7 @@ static void *Command_Server_Server_Connection_Thread(void *user_arg)
 		free(connection_context);
 		return NULL;
 	}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Server_Connection_Thread:"
 			   "connection callback about to be called");
 #endif
@@ -1303,7 +1303,7 @@ static void *Command_Server_Server_Connection_Thread(void *user_arg)
 	 * server context may be freed by here,
 	 * if Command_Server_Close_Server was called.
 	 */
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 3
 	Command_Server_Log(COMMAND_SERVER_LOG_BIT_GENERAL,"Command_Server_Server_Connection_Thread: "
 			   "connection callback finished.");
 #endif
@@ -1328,14 +1328,14 @@ static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffe
 	size_t total_bytes_written,bytes_written;
 	int write_errno,retval;
 
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 	Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: About to write %ld bytes.",
 				  buffer_length);
 #endif
 	total_bytes_written = 0;
 	while(total_bytes_written < buffer_length)
 	{
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: "
 					  "Writing %ld bytes starting at offset %ld.",
 					  buffer_length-total_bytes_written,total_bytes_written);
@@ -1351,7 +1351,7 @@ static int Write_Buffer(Command_Server_Handle_T handle,void *buffer,size_t buffe
 				total_bytes_written,bytes_written,buffer_length,strerror(write_errno));
 			return(FALSE);
 		}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_GENERAL,"Write_Buffer: "
 					  "Wrote %ld bytes.",bytes_written);
 #endif
@@ -1398,7 +1398,7 @@ static int Read_Binary_Buffer(Command_Server_Handle_T handle,void *data_buffer,s
 				total_bytes_read,data_buffer_length);
 			return(FALSE);
 		}
-#ifdef COMMAND_SERVER_DEBUG
+#if COMMAND_SERVER_DEBUG > 9
 		Command_Server_Log_Format(COMMAND_SERVER_LOG_BIT_DETAIL,"Read_Binary_Buffer: "
 				  "Last read %ld bytes (starting at %ld byte).",bytes_read,total_bytes_read);
 #endif
@@ -1429,6 +1429,10 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/06/02 13:42:46  cjm
+ * Temporary fix for reading long multi-line strings.
+ * Will not work if a partial read ends on a newline!
+ *
  * Revision 1.5  2006/06/02 13:17:23  cjm
  * Fixed log buffer overflow when logging long text message writes.
  *
