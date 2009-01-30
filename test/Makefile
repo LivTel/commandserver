@@ -1,4 +1,4 @@
-# $Header: /home/cjm/cvs/commandserver/test/Makefile,v 1.4 2006-10-19 09:58:13 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/test/Makefile,v 1.5 2009-01-30 15:41:03 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
@@ -9,12 +9,15 @@ BINDIR			= $(AUTOGUIDER_COMMANDSERVER_BIN_HOME)/$(TEST_HOME)/$(HOSTTYPE)
 INCDIR 			= $(AUTOGUIDER_COMMANDSERVER_SRC_HOME)/include
 DOCSDIR 		= $(AUTOGUIDER_COMMANDSERVER_DOC_HOME)/$(TEST_HOME)
 
+# log_udp library (log_udp.h is included for verbosity settings)
+LOG_UDP_CFLAGS		= -I$(LOG_UDP_SRC_HOME)/include
+
 #DEBUG_CFLAGS	= 
 DEBUG_CFLAGS	= -DCOMMAND_SERVER_DEBUG=5
 #-DGETFITS_DEBUG
 #-DGETFITS_DEBUG2
 
-CFLAGS 		= -g -I$(INCDIR) -I$(CFITSIOINCDIR) $(DEBUG_CFLAGS)
+CFLAGS 		= -g -I$(INCDIR) -I$(CFITSIOINCDIR) $(DEBUG_CFLAGS) $(LOG_UDP_CFLAGS)
 DOCFLAGS 	= -static
 
 EXE_SRCS	= test_server.c send_command.c test_getfits_command.c

@@ -1,4 +1,4 @@
-# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.6 2006-10-19 10:15:07 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.7 2009-01-30 15:40:26 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
@@ -8,10 +8,13 @@ BINDIR			= $(AUTOGUIDER_COMMANDSERVER_BIN_HOME)/c/$(HOSTTYPE)
 INCDIR 			= $(AUTOGUIDER_COMMANDSERVER_SRC_HOME)/include
 DOCSDIR 		= $(AUTOGUIDER_COMMANDSERVER_DOC_HOME)/cdocs
 
+# log_udp library (log_udp.h is included for verbosity settings)
+LOG_UDP_CFLAGS		= -I$(LOG_UDP_SRC_HOME)/include
+
 #DEBUG_CFLAGS	= 
 DEBUG_CFLAGS	= -DCOMMAND_SERVER_DEBUG=6
 
-CFLAGS 		= -g -I$(INCDIR) $(DEBUG_CFLAGS)
+CFLAGS 		= -g -I$(INCDIR) $(DEBUG_CFLAGS) $(LOG_UDP_CFLAGS)
 DOCFLAGS 	= -static
 
 LIB_SRCS	= command_server.c
@@ -67,6 +70,9 @@ checkout:
 
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.6  2006/10/19 10:15:07  cjm
+# Changed COMMAND_SERVER_DEBUG to be integer based to give more granular control of logging.
+#
 #
 
 # DO NOT DELETE
