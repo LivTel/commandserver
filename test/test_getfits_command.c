@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include "log_udp.h"
 #include "command_server.h"
 
 static void help(void);
@@ -82,8 +82,8 @@ int main(int argc, char* argv[])
 	}
 	/* setup logging */
 	Command_Server_Set_Log_Handler_Function(Command_Server_Log_Handler_Stdout);
-	Command_Server_Set_Log_Filter_Function(Command_Server_Log_Filter_Level_Bitwise);
-	Command_Server_Set_Log_Filter_Level(COMMAND_SERVER_LOG_BIT_GENERAL);
+	Command_Server_Set_Log_Filter_Function(Command_Server_Log_Filter_Level_Absolute);
+	Command_Server_Set_Log_Filter_Level(LOG_VERBOSITY_VERY_VERBOSE);
 	/* Establish a TCP connection */
 	printf("trying to connect to %s:%d\n", hostname, port);
 	retval = Command_Server_Open_Client(hostname, port, &handle);
