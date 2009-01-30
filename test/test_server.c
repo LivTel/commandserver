@@ -39,7 +39,7 @@
 #include <string.h>
 
 #include "fitsio.h"
-
+#include "log_udp.h"
 #include "command_server.h"
 
 /* internal functions */
@@ -103,8 +103,8 @@ int main(int argc, char* argv[])
 	}
 	/* setup logging */
 	Command_Server_Set_Log_Handler_Function(Command_Server_Log_Handler_Stdout);
-	Command_Server_Set_Log_Filter_Function(Command_Server_Log_Filter_Level_Bitwise);
-	Command_Server_Set_Log_Filter_Level(COMMAND_SERVER_LOG_BIT_GENERAL);
+	Command_Server_Set_Log_Filter_Function(Command_Server_Log_Filter_Level_Absolute);
+	Command_Server_Set_Log_Filter_Level(LOG_VERBOSITY_VERY_VERBOSE);
 	/* start server */
 	fprintf(stdout, "Starting multi-threaded server on port %hu.\n",port);
 	retval = Command_Server_Start_Server(&port,Test_Server_Connection_Callback,&Server_Context);
