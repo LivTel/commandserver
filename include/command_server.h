@@ -20,17 +20,6 @@
  */
 #define COMMAND_SERVER_ONE_MILLISECOND_NS	(1000000)
 
-/**
- * Value to pass into logging calls, used for general code logging.
- * @see #CCD_Global_Log
- */
-#define COMMAND_SERVER_LOG_BIT_GENERAL	(1<<0)
-/**
- * Value to pass into logging calls, used for detail code logging.
- * @see #CCD_Global_Log
- */
-#define COMMAND_SERVER_LOG_BIT_DETAIL	(1<<1)
-
 /* macros */
 #ifndef max
 /**
@@ -72,16 +61,26 @@ extern void Command_Server_Error(void);
 extern void Command_Server_Error_To_String(char *error_string);
 extern int Command_Server_Is_Error(void);
 /* logging routines */
-extern void Command_Server_Log_Format(int level,char *format,...);
-extern void Command_Server_Log(int level,char *string);
-extern void Command_Server_Set_Log_Handler_Function(void (*log_fn)(int level,char *string));
-extern void Command_Server_Set_Log_Filter_Function(int (*filter_fn)(int level,char *string));
-extern void Command_Server_Log_Handler_Stdout(int level,char *string);
+extern void Command_Server_Log_Format(char *sub_system,char *source_filename,char *function,int level,
+			       char *category,char *format,...);
+extern void Command_Server_Log(char *sub_system,char *source_filename,char *function,int level,
+			       char *category,char *string);
+extern void Command_Server_Set_Log_Handler_Function(void (*log_fn)(char *sub_system,char *source_filename,
+							char *function,int level,char *category,char *message));
+extern void Command_Server_Set_Log_Filter_Function(int (*filter_fn)(char *sub_system,char *source_filename,
+							char *function,int level,char *category,char *message));
+extern void Command_Server_Log_Handler_Stdout(char *sub_system,char *source_filename,
+					      char *function,int level,char *category,char *message);
 extern void Command_Server_Set_Log_Filter_Level(int level);
-extern int Command_Server_Log_Filter_Level_Absolute(int level,char *string);
-extern int Command_Server_Log_Filter_Level_Bitwise(int level,char *string);
+extern int Command_Server_Log_Filter_Level_Absolute(char *sub_system,char *source_filename,
+						    char *function,int level,char *category,char *message);
+extern int Command_Server_Log_Filter_Level_Bitwise(char *sub_system,char *source_filename,
+						   char *function,int level,char *category,char *message);
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/04/12 14:28:02  cjm
+ * Added min/max macros.
+ *
  * Revision 1.3  2006/04/10 16:41:43  cjm
  * Added COMMAND_SERVER_ONE_MILLISECOND_NS.
  *
