@@ -1,13 +1,13 @@
-# $Header: /home/cjm/cvs/commandserver/test/Makefile,v 1.5 2009-01-30 15:41:03 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/test/Makefile,v 1.6 2010-02-09 10:43:09 cjm Exp $
 
 include ../../../Makefile.common
 include ../../Makefile.common
 include ../Makefile.common
 
 TEST_HOME		= test
-BINDIR			= $(AUTOGUIDER_COMMANDSERVER_BIN_HOME)/$(TEST_HOME)/$(HOSTTYPE)
-INCDIR 			= $(AUTOGUIDER_COMMANDSERVER_SRC_HOME)/include
-DOCSDIR 		= $(AUTOGUIDER_COMMANDSERVER_DOC_HOME)/$(TEST_HOME)
+BINDIR			= $(RINGO2_COMMANDSERVER_BIN_HOME)/$(TEST_HOME)/$(HOSTTYPE)
+INCDIR 			= $(RINGO2_COMMANDSERVER_SRC_HOME)/include
+DOCSDIR 		= $(RINGO2_COMMANDSERVER_DOC_HOME)/$(TEST_HOME)
 
 # log_udp library (log_udp.h is included for verbosity settings)
 LOG_UDP_CFLAGS		= -I$(LOG_UDP_SRC_HOME)/include
@@ -30,10 +30,10 @@ DOCS 		= $(SRCS:%.c=$(DOCSDIR)/%.html)
 top: $(EXES) docs
 
 $(BINDIR)/test_server: $(BINDIR)/test_server.o
-	$(CC) $< -o $@  -L$(LT_LIB_HOME) -lautoguider_commandserver -lcfitsio $(TIMELIB) $(SOCKETLIB) -lm -lc
+	$(CC) $< -o $@  -L$(LT_LIB_HOME) -lringo2_commandserver -lcfitsio $(TIMELIB) $(SOCKETLIB) -lm -lc
 
 $(BINDIR)/%: $(BINDIR)/%.o
-	$(CC) $< -o $@  -L$(LT_LIB_HOME) -lautoguider_commandserver $(TIMELIB) $(SOCKETLIB) -lm -lc
+	$(CC) $< -o $@  -L$(LT_LIB_HOME) -lringo2_commandserver $(TIMELIB) $(SOCKETLIB) -lm -lc
 
 $(BINDIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@  
@@ -46,7 +46,7 @@ $(DOCS): $(SRCS)
 $(DOCS) : $(SRCS)
 
 depend:
-	makedepend -p$(BINDIR)/ -- $(CFLAGS) -- $(SRCS)
+	makedepend $(MAKEDEPENDFLAGS) -p$(BINDIR)/ -- $(CFLAGS) -- $(SRCS)
 
 clean:
 	$(RM) $(RM_OPTIONS) $(EXES) $(OBJS) $(TIDY_OPTIONS)
@@ -65,89 +65,99 @@ checkout:
 
 # DO NOT DELETE
 
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/features.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/sys/cdefs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/gnu/stubs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/linux/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/asm/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/malloc.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stddef.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/unistd.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix_opt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/types.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/wordsize.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/typesizes.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/confname.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/getopt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/stdio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/libio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/_G_config.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/gconv.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stdarg.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/stdio_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/sys_errlist.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/stdlib.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/string.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /home/dev/src/cfitsio3.006/include/fitsio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/limits.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/limits.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix1_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/local_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/linux/limits.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix2_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /home/dev/src/cfitsio3.006/include/longnam.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_server.o: /home/dev/src/autoguider/commandserver/include/command_server.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/stdio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/features.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/sys/cdefs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/gnu/stubs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stddef.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/types.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/wordsize.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/typesizes.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/libio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/_G_config.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/gconv.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stdarg.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/stdio_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/sys_errlist.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/stdlib.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/string.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/unistd.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/posix_opt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/bits/confname.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /usr/include/getopt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/send_command.o: /home/dev/src/autoguider/commandserver/include/command_server.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/features.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/sys/cdefs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/gnu/stubs.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/linux/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/asm/errno.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/stdio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stddef.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/types.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/wordsize.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/typesizes.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/libio.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/_G_config.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/wchar.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/gconv.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/lib/gcc-lib/i386-redhat-linux/3.2.2/include/stdarg.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/stdio_lim.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/sys_errlist.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/stdlib.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/string.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/unistd.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/posix_opt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/confname.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/getopt.h
-/home/dev/bin/autoguider/commandserver/test/i386-linux/test_getfits_command.o: /home/dev/src/autoguider/commandserver/include/command_server.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/features.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/sys/cdefs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/wordsize.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/gnu/stubs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/gnu/stubs-32.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/linux/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/asm/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/asm-generic/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/asm-generic/errno-base.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/malloc.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stddef.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/unistd.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix_opt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/types.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/typesizes.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/confname.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/getopt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/stdio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/libio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/_G_config.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/gconv.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stdarg.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/stdio_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/sys_errlist.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/stdlib.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/string.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /home/dev/src/cfitsio3200/include/fitsio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/limits.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/syslimits.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/limits.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix1_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/local_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/linux/limits.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /usr/include/bits/posix2_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /home/dev/src/cfitsio3200/include/longnam.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /home/dev/src/log_udp/include/log_udp.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_server.o: /home/dev/src/ringo2/commandserver/include/command_server.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/stdio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/features.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/sys/cdefs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/wordsize.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/gnu/stubs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/gnu/stubs-32.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stddef.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/types.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/typesizes.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/libio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/_G_config.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/gconv.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stdarg.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/stdio_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/sys_errlist.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/stdlib.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/string.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/unistd.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/posix_opt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/bits/confname.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /usr/include/getopt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/send_command.o: /home/dev/src/ringo2/commandserver/include/command_server.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/features.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/sys/cdefs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/wordsize.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/gnu/stubs.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/gnu/stubs-32.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/linux/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/asm/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/asm-generic/errno.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/asm-generic/errno-base.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/stdio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stddef.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/types.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/typesizes.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/libio.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/_G_config.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/wchar.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/gconv.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/lib/gcc/i386-redhat-linux/4.1.1/include/stdarg.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/stdio_lim.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/sys_errlist.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/stdlib.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/string.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/unistd.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/posix_opt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/bits/confname.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /usr/include/getopt.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /home/dev/src/log_udp/include/log_udp.h
+/home/dev/bin/ringo2/commandserver/test/i386-linux/test_getfits_command.o: /home/dev/src/ringo2/commandserver/include/command_server.h
