@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.10 2012-02-17 15:49:35 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.11 2012-02-20 10:27:57 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.10 $
+ * @revision $Revision: 1.11 $
  */
 
 /**
@@ -234,7 +234,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.10 2012-02-17 15:49:35 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.11 2012-02-20 10:27:57 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -596,7 +596,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		/* accept connection */
 		/* adlen is a value/result parameter, it should initially contain the size of the structure 
 		** pointed to by addr (connection_context->Connection_Handle->Address) */
-		adlen = sizeof(struct sockaddr_in);		
+		adlen = sizeof(struct sockaddr_in);
 		connection_context->Connection_Handle->Socket_fd =
 			accept((*server_context)->Listener_Handle->Socket_fd,
 				(struct sockaddr *)&(connection_context->Connection_Handle->Address),
@@ -802,7 +802,7 @@ int Command_Server_Read_Message(Command_Server_Handle_T handle,char **message)
 			read_errno = errno;
 			Command_Server_Error_Number = 42;
 			sprintf(Command_Server_Error_String,"Command_Server_Read_Message: read error(%d,%d,%d,%s).",
-				 handle->Socket_fd,bytes_read,total_bytes_read,strerror(read_errno));
+				handle->Socket_fd,bytes_read,total_bytes_read,strerror(read_errno));
 			return(FALSE);
 		}
 #if COMMAND_SERVER_DEBUG > 7
@@ -1461,6 +1461,9 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2012/02/17 15:49:35  cjm
+ * Backported some tiptilt commandserver mods.
+ *
  * Revision 1.9  2010/07/01 14:40:11  cjm
  * Added test for gethostbyname returning NULL in Command_Server_Open_Client.
  *
