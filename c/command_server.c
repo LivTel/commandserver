@@ -1,11 +1,11 @@
 /* Command_Server source file
- * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.11 2012-02-20 10:27:57 cjm Exp $
+ * $Header: /home/cjm/cvs/commandserver/c/command_server.c,v 1.12 2014-09-02 10:59:58 cjm Exp $
  */
 
 /**
  * Routines to support a simple one command text over socket command server.
  * @author Chris Mottram,LJMU
- * @revision $Revision: 1.11 $
+ * @revision $Revision: 1.12 $
  */
 
 /**
@@ -234,7 +234,7 @@ static void *Command_Server_Server_Connection_Thread (void *user_arg);
 /**
  * Revision Control System identifier.
  */
-static const char rcsid[] = "$Id: command_server.c,v 1.11 2012-02-20 10:27:57 cjm Exp $";
+static const char rcsid[] = "$Id: command_server.c,v 1.12 2014-09-02 10:59:58 cjm Exp $";
 
 
 /*===========================================================================*/
@@ -487,6 +487,10 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		*server_context = NULL;
 		return(FALSE);
 	}
+#if COMMAND_SERVER_DEBUG > 0
+	Command_Server_Log_Format("command server","command_server.c","Command_Server_Start_Server",
+				  LOG_VERBOSITY_TERSE,NULL,"Hostname is %s.",hostname);
+#endif
 	/* get host details (IP) */
 	if((host = gethostbyname(hostname)) == NULL)
 	{
@@ -499,6 +503,10 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		return(FALSE);
 	}
 	strcpy(host_ip,inet_ntoa(*(struct in_addr *)(host->h_addr_list[0])));
+#if COMMAND_SERVER_DEBUG > 0
+	Command_Server_Log_Format("command server","command_server.c","Command_Server_Start_Server",
+				  LOG_VERBOSITY_TERSE,NULL,"Host IP is %s.",host_ip);
+#endif
 	(*server_context)->Listener_Handle->Address.sin_family = AF_INET;
 	(*server_context)->Listener_Handle->Address.sin_addr.s_addr = inet_addr(host_ip);
 	(*server_context)->Listener_Handle->Address.sin_port = htons(*port);
@@ -510,8 +518,7 @@ int Command_Server_Start_Server(unsigned short *port,void (*connection_callback)
 		i = errno;
 		Command_Server_Error_Number = 27;
 		sprintf(Command_Server_Error_String,
-			 "Command_Server_Start_Server: failed to bind server socket: %s\n",
-			 strerror(i));
+			"Command_Server_Start_Server: failed to bind server socket(%d): %s\n",i,strerror(i));
 		free((*server_context)->Listener_Handle);
 		free(*server_context);
 		*server_context = NULL;
@@ -1461,6 +1468,9 @@ static void Get_Current_Time(char *time_string,int string_length)
 
 /*
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2012/02/20 10:27:57  cjm
+ * details changes.
+ *
  * Revision 1.10  2012/02/17 15:49:35  cjm
  * Backported some tiptilt commandserver mods.
  *
