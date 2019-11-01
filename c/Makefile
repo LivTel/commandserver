@@ -1,4 +1,4 @@
-# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.9 2012-02-20 10:59:41 cjm Exp $
+# $Header: /home/cjm/cvs/commandserver/c/Makefile,v 1.10 2019-11-01 16:28:52 cjm Exp $
 
 include ../../Makefile.common
 include ../Makefile.common
@@ -13,7 +13,7 @@ LOG_UDP_CFLAGS		= -I$(LOG_UDP_SRC_HOME)/include
 #DEBUG_CFLAGS	= 
 DEBUG_CFLAGS	= -DCOMMAND_SERVER_DEBUG=6
 
-CFLAGS 		= -g -I$(INCDIR) $(DEBUG_CFLAGS) $(LOG_UDP_CFLAGS)
+CFLAGS 		= -g -I$(INCDIR) $(DEBUG_CFLAGS) $(LOG_UDP_CFLAGS) $(SHARED_LIB_CFLAGS)
 DOCFLAGS 	= -static
 
 LIB_SRCS	= command_server.c
@@ -69,6 +69,9 @@ checkout:
 
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.9  2012/02/20 10:59:41  cjm
+# makedepend
+#
 # Revision 1.8  2010/02/09 10:42:25  cjm
 # *** empty log message ***
 #
