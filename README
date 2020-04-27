@@ -1,0 +1,4 @@
+Copied from ~dev/src/ringo2/commandserver on 20/02/2012.
+The ringo2 command_server.c has just been made the same as the autoguider and tiptilt versions.
+The arduino version is quite different (client side only, different CRLF handling).
+

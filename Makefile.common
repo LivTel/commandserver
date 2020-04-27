@@ -1,0 +1,17 @@
+# $Header: /home/cjm/cvs/commandserver/Makefile.common,v 1.1 2020-04-27 09:57:12 cjm Exp $
+
+SHELL					=	/bin/sh
+COMMANDSERVER_HOME			= 	commandserver
+LIBRARYNAME				= 	lib$(COMMANDSERVER_HOME)
+COMMANDSERVER_SRC_HOME			= 	$(LT_SRC_HOME)/$(COMMANDSERVER_HOME)
+COMMANDSERVER_BIN_HOME			= 	$(LT_BIN_HOME)/$(COMMANDSERVER_HOME)
+COMMANDSERVER_DOC_HOME			= 	$(LT_DOC_HOME)/$(COMMANDSERVER_HOME)
+
+# log_udp library (log_udp.h is included for verbosity settings)
+LOG_UDP_HOME				= log_udp
+LOG_UDP_SRC_HOME			= $(LT_SRC_HOME)/$(LOG_UDP_HOME)
+LOG_UDP_CFLAGS				= -I$(LOG_UDP_SRC_HOME)/include
+
+#
+# $Log: not supported by cvs2svn $
+#
