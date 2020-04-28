@@ -1,0 +1,2 @@
+Makefile filter=rcs-keywords
+*.c filter=rcs-keywords

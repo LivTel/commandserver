@@ -1,0 +1,2 @@
+ Makefile filter=rcs-keywords
+ Makefile.common filter=rcs-keywords
