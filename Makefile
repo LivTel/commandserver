@@ -1,7 +1,6 @@
 # Makefile
 # $Header: /home/cjm/cvs/commandserver/Makefile,v 1.1 2006-06-01 15:20:14 cjm Exp $
 
-include ../../Makefile.common
 include ../Makefile.common
 
 DIRS = c test 
