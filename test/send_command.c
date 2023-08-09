@@ -18,7 +18,7 @@
  * This enables the 'strdup' prototype in 'string.h', which is not enabled in
  * POSIX.
  */
-#define _BSD_SOURCE    1
+#define _GNU_SOURCE    1
 
 #include <stdio.h>
 #include <stdlib.h>

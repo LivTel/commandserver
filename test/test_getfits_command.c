@@ -19,7 +19,7 @@
  * This enables the 'strdup' prototype in 'string.h', which is not enabled in
  * POSIX.
  */
-#define _BSD_SOURCE    1
+#define _GNU_SOURCE    1
 
 #include <errno.h>
 #include <stdio.h>
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 	printf("client: Read binary data of length %ld bytes.\n",data_buffer_length);
 	if(data_buffer_length < 6)
 	{
-		printf("client: Data buffer was too short to be a FITS file(%d).\n",data_buffer_length);
+		printf("client: Data buffer was too short to be a FITS file(%ld).\n",data_buffer_length);
 		Command_Server_Close_Client(&handle);
 		return 7;
 	}
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 				free(data_buffer);
 			fclose(fp);
 			Command_Server_Close_Client(&handle);
-			fprintf(stderr,"client: Failed to write output (%d of %d).\n",retval,data_buffer_length);
+			fprintf(stderr,"client: Failed to write output (%d of %ld).\n",retval,data_buffer_length);
 			return 9;
 		}
 		retval = fclose(fp);

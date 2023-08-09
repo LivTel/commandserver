@@ -242,7 +242,7 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 	{
 		sprintf(reply_buff,"Send_Fits_Reply:failed to allocate buffer.");
 		Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
-		fprintf(stderr,"Send_Fits_Reply:failed to allocate buffer (%d).\n",buffer_length);
+		fprintf(stderr,"Send_Fits_Reply:failed to allocate buffer (%ld).\n",buffer_length);
 		return FALSE;
 	}
 	retval = 0;
@@ -317,7 +317,7 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 	Command_Server_Write_Binary_Message(connection_handle,reply_buff,strlen(reply_buff));
 #else
 	/* send image back to the client */
-	fprintf(stdout,"server: about to send binary message of length '%d'\n",buffer_length);
+	fprintf(stdout,"server: about to send binary message of length '%ld'\n",buffer_length);
 	retval = Command_Server_Write_Binary_Message(connection_handle,buffer,buffer_length);
 	if(retval == FALSE)
 	{
@@ -332,7 +332,7 @@ static int Send_Fits_Reply(Command_Server_Handle_T connection_handle)
 #endif
 	if(buffer != NULL)
 		free(buffer);
-	fprintf(stdout,"server: sent binary message of length '%d'\n",buffer_length);
+	fprintf(stdout,"server: sent binary message of length '%ld'\n",buffer_length);
 	return TRUE;
 }
 
@@ -355,7 +355,7 @@ static int Save_Buffer(char *filename,void *buffer,size_t buffer_length)
 	if(retval != buffer_length)
 	{
 		fclose(fp);
-		fprintf(stderr,"Save_Buffer: Failed to write output (%d of %d).\n",retval,buffer_length);
+		fprintf(stderr,"Save_Buffer: Failed to write output (%d of %ld).\n",retval,buffer_length);
 		return FALSE;
 	}
 	retval = fclose(fp);

@@ -29,7 +29,7 @@ top: $(LT_LIB_HOME)/$(LIBRARYNAME).so docs
 static: $(LT_LIB_HOME)/$(LIBRARYNAME).so
 
 $(LT_LIB_HOME)/$(LIBRARYNAME).so : $(LIB_OBJS)
-	$(CC) $(CCSHAREDFLAG) $(CFLAGS) $(LIB_OBJS) -o $@
+	$(CC) $(CCSHAREDFLAG) $(CFLAGS) $(LIB_OBJS) $(TIMELIB) -lpthread -o $@
 
 $(LT_LIB_HOME)/$(LIBRARYNAME).a : $(LIB_OBJS)
 	ar rcv $@ $?
